@@ -2,6 +2,12 @@
  * Labirynt #Dijkstra
  * @author: Paweł Sawicki
  * g++ dijkstra_s.cpp -o dijkstra
+ * Nieukonczone!
+ * Wersja bez licznika!
+ * ./dijkstra -r - (dane.txt)
+ * ./dijkstra -d - (dane.txt)
+ *  na razie 2 przygotowane pliki z labiryntami
+ * (moga byc drobne bledy)
  */
 #include <iostream>
 #include <stdio.h>
@@ -73,15 +79,18 @@ switch(argv[1][1]){
     }
   }
   int s[MAX]; // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
-  cout << v0 << " > ";
+  FILE *wy = fopen("wynik.txt","w");
+  fprintf(wy,"%i> ",v0);
   i = 0; j = vk;
+
     while(j)
     {
       s[i++] = j; j = p[j];
     }
-    while(i) cout << s[--i] << " ";
-        cout << " > " << vk << " #" << k[vk] << endl;
- fclose(we);
- return 0;
+    while(i)
+        fprintf(wy,"%i ",s[--i]); // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
+        fprintf(wy,">%i #%i",vk,k[vk]);
+fclose(wy);
+fclose(we);
+return 0;
 }
-
