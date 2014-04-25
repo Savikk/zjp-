@@ -1,15 +1,19 @@
 /*
  * Labirynt #Dijkstra
  * @author: Paweł Sawicki
- * g++ dijkstra_s.cpp -o dijkstra -lrt
- * Licznik: on
+ * g++ dijkstra_s.cpp -o dijkstra -fopenmp -lrt
+ * (moga byc drobne bledy)
+ * licznik: on
+ * openmpi
  */
+
+#include <omp.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#define MAX 99999999
+#define MAX 999999
 #define INF 9999
 using namespace std;
 double timeDiff(struct timespec *timeA_p, struct timespec *timeB_p)
@@ -26,19 +30,20 @@ struct Node {
   int waga; // waga ( W labiryncie kazda waga wynosi 1)
   struct Node * nast;
 };
+  int ilosc,nr;
+  int i,j,x,y,z,v0,vk,u,n,m; // x,y,z - pomocnicze
+  int k[MAX],p[MAX]; // k - koszt, p - pomocnicze do obliczania kosztow
+  bool Q[MAX]; // Q - sasiedztwo
+  struct Node *sv[MAX],*pw; // sv - jakie wierzcholek ma sasiedztwo
+
 int main(int argc,char **argv){
 if(argc < 3){
     printf("Użycie: a.out plik_wejsciowy.txt plik_wyjsciowy.txt");
     return -1;
   }
-
-
-  int i,j,x,y,z,v0,vk,u,n,m; // x,y,z - pomocnicze
-  int k[MAX],p[MAX]; // k - koszt, p - pomocnicze do obliczania kosztow
-  bool Q[MAX]; // Q - sasiedztwo
-  struct Node *sv[MAX],*pw; // sv - jakie wierzcholek ma sasiedztwo
   clock_gettime(CLOCK_MONOTONIC, &start);
   we =fopen(argv[1],"r"); 
+ 
   for(i = 1; i <= MAX; i++)
   {
     k[i] = INF;
@@ -62,15 +67,25 @@ if(argc < 3){
   }
   clock_gettime(CLOCK_MONOTONIC, &e_input);
   k[v0] = 0; // v0 to v0 koszt zerowy
-  clock_gettime(CLOCK_MONOTONIC, &s_steps);
-  for(i = 1; i <= n; i++)
- { // Sprawdzenie czy droga do wierzcholka nie jest zbyt kosztowna
-    u = -1; // (sciany labiryntu maja wieksza wage niz normalne drogi pomiedzy wierzcholkami)
-    for(j = 1; j <= n; j++)
-    if(!Q[j] && ((u == -1) || (k[j] < k[u]))) u = j;
+  clock_gettime(CLOCK_MONOTONIC, &s_steps); //stars steps
+	#pragma omp parallel
+	{ int startv,endv,step,step2,	me = omp_get_thread_num();
+	#pragma omp single
+	{ nr = omp_get_num_threads(); ilosc = m/nr;
+		printf("%d threads\n",nr);}
+	startv = me * ilosc;
+	endv = startv+ ilosc -1;
+	
+	for(step=startv;step<endv;step++){ 
+    u = -1; 
+    
+    for(step2 = startv; step2 <= endv; step2++)
+    if(!Q[step2] && ((u == -1) || (k[step2] < k[u]))) u = step2;
     Q[u] = true;
     pw = sv[u]; // uaktualnienie sasiadow wierzcholka
-    while(pw) {
+  #pragma omp barrier
+}
+  while(pw) {
       if(!Q[pw->nw] && (k[pw->nw] > k[u] + pw->waga)) // uaktualnia sasiedztwo wierzcholka
       { // przy przejsciu do nastepnego
         k[pw->nw] = k[u] + pw->waga;
@@ -79,19 +94,31 @@ if(argc < 3){
       pw = pw->nast;
     }
   }
-  int s[MAX]; // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
+//	#pragma omp barrier	
+//}
+  long int s[MAX]; // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
+  int ii;  
   clock_gettime(CLOCK_MONOTONIC, &e_steps);
   wy = fopen(argv[2],"w");
-  fprintf(wy,"%i> ",v0);
+  for(i=1;i<=n;i++){
+	fprintf(wy,"%i :",i);
+	ii=0;
+	 j=i;
+	while(j){
+	s[ii++]=j;j=p[j];}
+	while(ii){ fprintf(wy,"%i ",s[--ii]);}
+	fprintf(wy,"~%i",k[i]);	
+}
+  fprintf(wy,"v0 do vk: %i> ",v0);
   i = 0; j = vk;
-
+	
     while(j)
     {
       s[i++] = j; j = p[j];
     }
     while(i)
-        fprintf(wy,"%i ",s[--i]); // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
-        fprintf(wy,">%i #%i",vk,k[vk]);
+        fprintf(wy,"%ld ",s[--i]); // wypisywanie kolejnych wierzcholkow drogi od v0 do vk
+        fprintf(wy,">%i ~%i",vk,k[vk]);
     
 clock_gettime(CLOCK_MONOTONIC, &end);
 printf("Time : %.16f\n", timeDiff(&end, &start));
