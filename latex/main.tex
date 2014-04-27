@@ -1,0 +1,146 @@
+\documentclass{paper}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=3.5cm, bottom=3.5cm, headsep=1.2cm]{geometry}
+
+\title{Algorytm Dijkstry Znajdowanie
+najkrótszej drogi w labiryncie.
+OMP}
+\author{Pawe³ Sawicki }
+\date{April 2014}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\section{Wprowadzenie}
+\textit{ Algorytm Dijkstry, opracowany przez holenderskiego informatyka Edsgera
+Dijkstrê, s³u¿y do znajdowania najkrótszej œcie¿ki z pojedynczego
+Ÿród³a w grafie o nieujemnych wagach krawêdzi.}
+
+\section{Dzia³anie}
+
+Maj¹c dany graf z wyró¿nionym wierzcho³kiem (Ÿród³em) algorytm
+znajduje odleg³oœci od Ÿród³a do wszystkich pozosta³ych wierzcho³ków. £atwo zmodyfikowaæ go
+tak, aby szuka³ wy³¹cznie (najkrótszej) œcie¿ki do jednego ustalonego wierzcho³ka, po prostu
+przerywaj¹c dzia³anie w momencie dojœcia do wierzcho³ka docelowego, b¹dŸ transponuj¹c
+tablicê incydencji grafu. Algorytm Dijkstry znajduje w grafie wszystkie
+najkrótsze œcie¿ki pomiêdzy wybranym wierzcho³kiem a wszystkimi pozosta³ymi, przy okazji
+wyliczaj¹c równie¿ koszt przejœcia ka¿dej z tych œcie¿ek. Algorytm ten jest przyk³adem
+algorytmu zach³annego.
+\section{Algorytm}
+Nazwijmy wierzcho³ek startowy v0. Niech odleg³oœæ wierzcho³ka Y bêdzie odleg³oœci¹ od
+wierzcho³ka v0 do wierzcho³ka Y. Algorytm przydzieli im odleg³oœci pocz¹tkowe, a potem te
+odleg³oœci poprawi.
+
+1. Przydziel ka¿demu wierzcho³kowi odleg³oœæ(d):d[v0]=0, dla reszty d[vi]=inf.
+
+2. Zaznacz wszystkie wierzcho³ki jako nieodwiedzone. Ustaw v0 jako aktualny wierzcho³ek.
+Stwórz tablice nieodwiedzonych wierzcho³ków. 
+
+3.Dla aktualnego wierzcho³ka rozwa¿
+nieodwiedzonych s¹siadów i porównaj ich wagi. Wybierz najmniejsz¹. Nastêpnie ustaw
+wierzcho³ek z najmniejsz¹ wag¹ jako aktualny i usuñ z wierzcho³ków nieodwiedzonych.
+
+4. Kiedy zostan¹ rozwa¿eni wszyscy s¹siedzi wierzcho³ka, ustaw go jako odwiedzony i usuñ z
+nieodwiedzonych. Odwiedzony wierzcho³ek nie bêdzie wiêcej sprawdzany.
+
+5. Je¿eli wierzcho³ek docelowy jest ustawiony jako odwiedzony(planuj¹c drogê pomiêdzy
+dwoma konkretnymi wierzcho³kami) albo je¿eli jego waga wynosi nieskoñczonoœæ to koniec.
+Algorytm zosta³ zakoñczony.
+
+6. Wybierz nieodwiedzony wierzcho³ek, który ma najmniejsz¹ wage i ustaw jako aktualny
+wierzcho³ek, a potem wróæ do kroku trzeciego.
+\section{Rozwi¹zanie}
+Program sekwencyjny zosta³ napisany tak aby wykonywa³ normalny algorytm dijkstry(odleg³oœæ
+od wierzcho³ka pocz¹tkowego do ka¿dego wierzcho³ka w grafie). Jedynie drukowana jest
+odleg³oœæ od wybranego wierzcho³ka v1 do wybranego wierzcho³ka koñcowego.
+Program równoleg³y jest taki sam z wyj¹tkiem drukowania, tutaj drukowane s¹ dodatkowo
+wszystkie odleg³oœci. Dodatkowo jest wydruk od v1 do vk. Jedynie kroki algorytmu dijkstry s¹
+równoleg³e, wczytywanie z pliku i drukowanie s¹ sekwencyjne.
+\section{Dane wejœciowe}
+Generator po otrzymaniu iloœci wierzcho³ków jakie chcemy mieæ w grafie(labiryncie) generuje
+nam krawêdzie pomiêdzy wierzcho³kami.
+./a.out liczbav vkoncowe iloscscian plikwyjsciowy
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1]{generator.jpg}
+\caption{Przyk³ad generowania}
+\label{fig:generator}
+\end{figure}
+
+Labirynty generowane s¹ w formie:
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1]{rys01.jpg}
+\caption{Przyk³adowy labirynt}
+\label{fig:generator}
+\end{figure}
+
+Plik dane.txt (plik w folderze obok).W miejcach gdzie s¹ czerwone po³¹czenia wagi wynosz¹
+100, w czarnych 1. Wagi 100 ‘symuluj¹’ œciany labiryntu. Na takim labiryncie wykonano pierwsze
+2 testy.
+\section{Pomiar Czasu}
+Ka¿dy test odpalany by³ 5 razy i do tabelki zosta³ wpisany œredni wynik.
+
+\begin{table}
+\begin{tabular}{|l|c|c|c|c|}
+Test &4 & w¹tki Sigma (8
+w¹tków)&
+32 w¹tki & Xeon Phi 
+240 w¹tków & & Time: & Time: & Time: & Time: &
+
+\multirow{}{Sekwencyjnie 169 dróg} & Time: & Time: & Time: & Time: &
+& 0.000408515 & 0.001370413 & 0.000329656 & 0.001110299 &
+ & Read: & Read: & Read: & Read: &
+ & 0.000152748 & 0.000112501 & 0.000144364 & 0.0005944 &
+ & Steps: & Steps: & Steps: & Steps: &
+ & 0.000035639 & 0.000016141 & 0.000030662 & 0.0000468 
+&
+\multirow{}{OMP 50} & Time: & Time: & Time: & Time: &
+ & 0.019825061 & 0.033928341 & 0.017841893 & 0.278055531 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.000111322 & 0.000099244 & 0.000144509 & 0.000701645 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 0.019491082 & 0.032262697 & 0.017456805& 0.250724569 & 
+  \multirow{}{OMP 100} & Time: & Time: & Time: & Time: &
+ & 0.001321087 & 0.00175629700 & 0.043707225 & 0.273716571 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.000245507 & 0.00012285100 & 0.000116262 & 0.000977124 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 0.000408094 & 0.000389783 & 0.02523804& 0.271734131 &
+  \multirow{}{OMP 1000} & Time: & Time: & Time: & Time: &
+ & 0.018177334 & 0.134693921 & 0.028073719 & 0.292792703 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.002951574 & 0.002354198 & 0.000876282 & 0.008462411 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 0.014092035 & 0.110725065 & 0.009335235& 0.253203801 &
+  \multirow{}{OMP 10000} & Time: & Time: & Time: & Time: &
+ & 0.41508565 & 0.193165775 & 0.036099128 & 0.424844348 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.013204211 & 0.008954283 & 0.000858164 & 0.086286142 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 0.393656946 & 0.160013222 & 0.021397569& 0.258833177 &
+ \multirow{}{OMP 10000} & Time: & Time: & Time: & Time: &
+ & 39.7326325639999993 & 12.0788551389999999 & 0.043406191 & 1.8360153440000002 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.097112304 & 0.09575919 & 0.008435412 & 0.9781656870000001 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 39.57622549700 & 11.9192767530000001 & 0.013507856& 0.417627523 &  \multirow{}{OMP 500000} & Time: & Time: & Time: & Time: &
+ & 83.63712682 & 15.02447536 & 0.593838284 & 1.76472193 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.189289604 & 0.09248116 & 0.088157858 & 0.901385709 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 83.3847826070000053 & 12.2416325 & 0.461420997& 0.427203886 &
+  \multirow{}{OMP 1000000} & Time: & Time: & Time: & Time: &
+ & 141.26182324 & 21.02447536 & 0.971426213 & 1.8761751 & 
+ & Read: & Read: & Read: & Read: & 
+ & 0.241487416 & 0.15153216 & 0.1371435 & 0.9813547 & 
+ & Steps: & Steps: & Steps: & Steps: &
+ & 139.9571 & 19.9012991 & 0.8161478& 0.443157231 &
+\end{tabular}
+\end{table}
+\end{document}
